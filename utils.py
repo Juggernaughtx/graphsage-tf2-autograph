@@ -13,8 +13,7 @@ minor = version_info[1]
 assert (major <= 1) and (minor <= 11), "networkx major version > 1.11"
 
 
-def load_data(prefix, normalize=True, load_walks=False):
-    print("R50")
+def load_data(prefix='reddit/reddit', normalize=True, load_walks=False):
     G_data = json.load(open(prefix + "-G.json"))
     G = json_graph.node_link_graph(G_data)
 

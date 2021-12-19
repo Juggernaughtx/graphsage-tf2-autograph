@@ -131,4 +131,4 @@ def fit_train():
     )
 
 if __name__ == "__main__":
-    train()
+    fit_train()
