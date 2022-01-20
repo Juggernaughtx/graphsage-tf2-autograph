@@ -42,7 +42,7 @@ class Sample(tf.keras.layers.Layer):
         for k in range(len(self.layer_infos)):   
             t = len(self.layer_infos) - k - 1
             support_size *= self.layer_infos[t]
-            node = DynamicSample(samples[k], self.layer_infos[t])
+            node = UniformSample(samples[k], self.layer_infos[t])
             samples.append(tf.reshape(node, [support_size * len(samples[0]),]))
             support_sizes.append(support_size)
 
@@ -90,7 +90,6 @@ class Aggregate(tf.keras.layers.Layer):
                     dropout=dropout,
                     name=name,
                     concat=concat,
-                    model_size=model_size,
                 )
             else:
                 aggregator = self.aggregator_cls(
@@ -99,7 +98,6 @@ class Aggregate(tf.keras.layers.Layer):
                     dropout=dropout,
                     name=name,
                     concat=concat,
-                    model_size=model_size,
                 )
             self.aggregators.append(aggregator)
 

@@ -1,4 +1,4 @@
-# Graphsage TF2 with GPU support (AutoGraph)
+# Graphsage TF2 (AutoGraph)
 GraphSAGE (original implementation): https://github.com/williamleif/GraphSAGE
 
 MeanAggregator only

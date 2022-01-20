@@ -16,16 +16,10 @@ class SupervisedGraphsage(tf.keras.Model):
         layer_infos,
         num_classes,
         concat=True,
-        aggregator_type="mean",
-        model_size="small",
+        hidden_dim=128,
         **kwargs
     ):
         super().__init__()
-        
-        if model_size == "small":
-            hidden_dim = 128
-        elif model_size == "big":
-            hidden_dim = 256
             
         dims = [features.shape[1]]
         dims.extend([hidden_dim for i in range(len(layer_infos))])

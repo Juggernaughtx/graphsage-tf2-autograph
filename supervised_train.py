@@ -9,7 +9,7 @@ from itertools import islice
 import math
 import random
 
-from .supervised_models import SupervisedGraphsage
+from .supervised_model import SupervisedGraphsage
 from .utils import load_data
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -40,7 +40,7 @@ def load_dummy_data():
     feats = np.array(feats, dtype=np.float64)
     labels = np.random.randint(41, size=len(all_nodes))
     num_classes = 41
-    return feats, train_nodes, val_nodes, test_nodes, adj, labels, num_classes, timestamps
+    return feats, train_nodes, val_nodes, test_nodes, adj, labels, num_classes
 
 
 def calc_f1(y_true, y_pred):
@@ -51,7 +51,7 @@ def calc_f1(y_true, y_pred):
     )
 
         
-def incremental_evaluate(nodes, id_map, model, class_map, size):
+def incremental_evaluate(nodes, model, class_map, size):
     t_test = time.time()
     val_preds = []
     labels = []
@@ -59,7 +59,7 @@ def incremental_evaluate(nodes, id_map, model, class_map, size):
     while iter_num < math.floor(len(nodes)/size):
         inputs = nodes[iter_num*size:(iter_num+1)*size]
         batch_labels = class_map[np.array(inputs)]
-        val_logits, h, c = model(inputs, training=False)
+        val_logits = model(inputs, training=False)
         val_preds = np.vstack(val_logits)
         labels = np.vstack(batch_labels)
         iter_num += 1
@@ -86,7 +86,7 @@ class minibatch_func(tf.keras.utils.Sequence):
             logging.info("\nval idx " + str(idx))
 
         batch = np.array(self.x[idx*self.batch_size:(idx+1)*self.batch_size])
-        batch_labels = all_labels[batch]
+        batch_labels = self.y[batch]
 
         return batch, batch_labels
 
@@ -98,7 +98,7 @@ def fit_train():
     print("Done loading training data..")
 
     feats = np.vstack([feats, np.zeros((feats.shape[1],))])    
-    #feats, train_nodes, val_nodes, test_nodes, adj, labels, num_classes, timestamps = load_dummy_data()
+    #feats, train_nodes, val_nodes, test_nodes, adj, class_map, num_classes = load_dummy_data()
     
     feats1 = tf.convert_to_tensor(feats, dtype=tf.float32)
     model = SupervisedGraphsage(
@@ -111,11 +111,11 @@ def fit_train():
     
     model.compile(optimizer=optimizer, loss=loss_fn, metrics=acc_metric)
     
-    train_gen = minibatch_func(train_nodes, class_map, BATCH_SIZE, adj, SAMPLE_SIZES, train=True)
-    val_gen = minibatch_func(val_nodes, class_map, VAL_BATCH_SIZE, adj, SAMPLE_SIZES, train=False)
+    train_gen = minibatch_func(train_nodes, class_map, BATCH_SIZE, SAMPLE_SIZES, train=True)
+    val_gen = minibatch_func(val_nodes, class_map, BATCH_SIZE, SAMPLE_SIZES, train=False)
 
     
-    model.fit(train_gen, epochs=10, shuffle=False, workers=1, validation_data=val_gen)
+    model.fit(train_gen, epochs=10, shuffle=True, workers=1, validation_data=val_gen)
     print("Model trained!")
 
 
